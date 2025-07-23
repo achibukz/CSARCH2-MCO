@@ -1,5 +1,14 @@
-class Cache{
+/*
 
+Idea dump: 
+Cache is handling the cache structure
+Finding the # of blocks
+Adding or Removing blocks from the cache
+
+*/
+
+class Cache{ 
+    
     /* 
     numBlocks: Number of Cache Blocks
     num: constant, divide always by 4 since its 4-way
