@@ -106,7 +106,6 @@ class MRUPolicy {
                 explanation += 'MISS! Loaded block ' + block + ' into available cache slot.';
             }
         }
-        
         explanation += ' Current MRU order: [' + mruSet.join(', ') + ']';
         return explanation;
     }
