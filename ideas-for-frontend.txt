@@ -1,0 +1,45 @@
+Idea Dump for Front End People:
+
+Two-column design (flex/grid layout)
+
+Left side → Inputs, controls, statistics
+Right side → Cache logs
+
+Left Panel: Controls & Stats
+
+Assuming 4 Blocks and Cache Line Size 1
+
+Control Buttons (top section)
+    Load Sequential Test (0123456701234567)
+    Load Mid-Repeat Test (0123123456701231234567)
+    Load Random Test (random numbers)
+    Load Custom Test (user input)
+
+    Start Step-by-Step 
+    Next Step, Previous Step
+    Run All Steps
+    Reset
+
+Statistics (bottom section)
+    Memory Access Count
+    Cache Hit Count
+    Cache Miss Count
+    Cache Hit Rate
+    Cache Miss Rate
+    Average Memory Access Time
+    Total Memory Access Time
+
+Right Panel: Cache State + Step Log
+
+Set | Way 1 | Way 2 | Way 3 | Way 4
+0   | blk#  | blk#  | blk#  | blk#  
+1   | blk#  | blk#  | blk#  | blk#  
+
+*Note: maybe considering adding time would also help visualize MRU 
+
+Step-by-Step Log
+
+Step 1: Step 1: Access block 0 → Set 0. MISS! Loaded block 0 into available cache slot. Current MRU order: [0]
+Step 2: ...
+...
+Step 10: Access block 1 → Set 0. HIT! Block 1 found in cache. Updated MRU order. Current MRU order: [2, 7, 0, 1]
