@@ -5,7 +5,7 @@ Cache is handling the cache structure
 Finding the # of blocks
 Adding or Removing blocks from the cache
 Checker for Set and Getters
- 
+
 */
 
 class Cache {
@@ -105,7 +105,6 @@ class Cache {
      * Get current cache state (simple copy)
      */
     getCache() {
-        // Simple array copy without JSON
         const cacheCopy = [];
         for (let i = 0; i < this.cache.length; i++) {
             cacheCopy[i] = [];

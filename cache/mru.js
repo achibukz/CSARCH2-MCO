@@ -40,7 +40,7 @@ class MRUPolicy {
 
     /**
      * Get the block to evict (Most Recently Used)
-     * Returns the block that should be evicted
+     * Returns the block that should be Removed
      */
     getBlockToEvict(setIndex) {
         const mruSet = this.mruOrder[setIndex];
@@ -52,7 +52,7 @@ class MRUPolicy {
     }
 
     /**
-     * Remove a block from MRU tracking (when evicted)
+     * Remove a block from MRU tracking (when Removed)
      */
     removeFromMRU(block, setIndex) {
         const mruSet = this.mruOrder[setIndex];
@@ -70,7 +70,7 @@ class MRUPolicy {
     }
 
     /**
-     * Get all MRU orders (simple copy without JSON)
+     * Get all MRU orders
      */
     getAllMRUOrders() {
         const mruCopy = [];
@@ -93,15 +93,15 @@ class MRUPolicy {
     /**
      * Generate explanation of MRU decision
      */
-    generateExplanation(block, setIndex, isHit, evictedBlock) {
+    generateExplanation(block, setIndex, isHit, RemovedBlock) {
         const mruSet = this.mruOrder[setIndex];
         let explanation = 'Access block ' + block + ' → Set ' + setIndex + '. ';
         
         if (isHit) {
             explanation += 'HIT! Block ' + block + ' found in cache. Updated MRU order.';
         } else {
-            if (evictedBlock !== null) {
-                explanation += 'MISS! Cache full. Evicted MRU block ' + evictedBlock + ', loaded block ' + block + '.';
+            if (RemovedBlock !== null) {
+                explanation += 'MISS! Cache full. Removed MRU block ' + RemovedBlock + ', loaded block ' + block + '.';
             } else {
                 explanation += 'MISS! Loaded block ' + block + ' into available cache slot.';
             }
