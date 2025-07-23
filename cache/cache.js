@@ -4,104 +4,133 @@ Idea dump:
 Cache is handling the cache structure
 Finding the # of blocks
 Adding or Removing blocks from the cache
-
+Checker for Set and Getters
+ 
 */
 
-class Cache{ 
+class Cache {
     
-    /* 
-    numBlocks: Number of Cache Blocks
-    num: constant, divide always by 4 since its 4-way
-    */
-    constructor(numBlocks, num){ 
+    constructor(numBlocks, ways, lineSize = 1) {
         this.numBlocks = numBlocks;
-        this.num = num;
+        this.ways = ways;
+        this.lineSize = lineSize; // words per cache line
         this.cache = this.initCache();
-        this.MRU = this.initMRU();
     }
 
-    initCache(){
-        const sets = this.numBlocks / this.num; // Getting Number of sets 
-        return Array.from({length: sets}, () => []); // creates sub-arrays [ [],[],[] ]
+    /**
+     * Initialize cache structure - array of sets, each set is an array of blocks
+     */
+    initCache() {
+        const sets = this.numBlocks / this.ways;
+        return Array.from({ length: sets }, () => []);
     }
 
-    initMRU(){
-        const sets = this.numBlocks / this.num; // Getting Number of sets 
-        return Array.from({length: sets}, () => []); // creates sub-arrays [ [],[],[] ]
-    }
-
-    /* 
-    Accessing a block in the cache
-    Returns: 
-        hit: boolean
-        index: number
-        removeBlock: null or number
-    */
-    accessBlock(block){
-        const index = block % this.cache.length;
-        const set = this.cache[index];
-        const mruSet = this.MRU[index];
-        const hitIndex = set.indexOf(block);
-
-        let hit = false;  // Cache Hit
-        let removeBlock = null; // Block that gets removed from the cache when the set is already full 
+    /**
+     * Find a block in the cache
+     * Returns: { found: boolean, setIndex: number, wayIndex: number }
+     */
+    findBlock(block) {
+        const setIndex = block % this.cache.length;
+        const set = this.cache[setIndex];
+        const wayIndex = set.findIndex(entry => entry === block);
         
-        if (hitIndex != -1){
-            hit = true; 
+        return {
+            found: wayIndex !== -1,
+            setIndex: setIndex,
+            wayIndex: wayIndex
+        };
+    }
 
-            // Update the MRU order
-            const mruPos = mruSet.indexOf(block);
-            if (mruPos !== -1) {
-                mruSet.splice(mruPos, 1);
-            }
-            mruSet.push(block);
-        }
-        else {
-           // Cache miss
-            if (set.length >= this.num) {
-                // Cache set is full, evict the least recently used (first in MRU)
-                removeBlock = mruSet.shift(); // pop from front
-                const removeIndex = set.indexOf(removeBlock);
-                if (removeIndex !== -1) {
-                    set.splice(removeIndex, 1);
-                }
-            }
-
-            // Add new block to set and MRU
+    /**
+     * Add a block to a specific set
+     * Returns: boolean (success/failure)
+     */
+    addBlock(block, setIndex) {
+        const set = this.cache[setIndex];
+        if (set.length < this.ways) {
             set.push(block);
-            mruSet.push(block);
+            return true;
         }
-
-        return {hit, index, removeBlock};
+        return false; // Set is full
     }
 
-    // Random Idea but out program should have a button that will clear or RESET the cache into its empty state
-    resetCache(){
+    /**
+     * Remove a block from cache
+     * Returns: boolean (success/failure)
+     */
+    removeBlock(block, setIndex) {
+        const set = this.cache[setIndex];
+        const blockIndex = set.indexOf(block);
+        if (blockIndex !== -1) {
+            set.splice(blockIndex, 1);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Replace a block in cache (remove old, add new)
+     */
+    replaceBlock(oldBlock, newBlock, setIndex) {
+        const set = this.cache[setIndex];
+        const oldIndex = set.indexOf(oldBlock);
+        if (oldIndex !== -1) {
+            set.splice(oldIndex, 1);
+        }
+        set.push(newBlock);
+    }
+
+    /**
+     * Get a specific set
+     */
+    getSet(setIndex) {
+        return this.cache[setIndex];
+    }
+
+    /**
+     * Check if a set is full
+     */
+    isSetFull(setIndex) {
+        return this.cache[setIndex].length >= this.ways;
+    }
+
+    /**
+     * Reset cache to initial empty state
+     */
+    reset() {
         this.cache = this.initCache();
-        this.MRU = this.initMRU();
     }
 
-    //Function that will get the current state of the cache
-    getCache(){
-        return this.cache;
+    /**
+     * Get current cache state (simple copy)
+     */
+    getCache() {
+        // Simple array copy without JSON
+        const cacheCopy = [];
+        for (let i = 0; i < this.cache.length; i++) {
+            cacheCopy[i] = [];
+            for (let j = 0; j < this.cache[i].length; j++) {
+                cacheCopy[i][j] = this.cache[i][j];
+            }
+        }
+        return cacheCopy;
     }
 
-    //Funtion that will get the current state of the MRU
-    getMRU(){
-        return this.MRU;
-    }
-
-    /* Adlers notes, cache statistics
-    Total Accesess, # of hits , # of miss , and hit rate
-    */
-   getStats() {
+    /**
+     * Get cache statistics
+     */
+    getStats() {
         let totalBlocks = 0;
         this.cache.forEach(set => {
-            totalBlocks = totalBlocks + set.length;
-        })
-
-        return{
-            totalBlocks, sets: this.cache.length, num: this.num, util: ((totalBlocks/this.numBlocks) * 100).toFixed(2) + '%'
+            totalBlocks += set.length;
+        });
+        
+        return {
+            totalBlocks: totalBlocks,
+            sets: this.cache.length,
+            ways: this.ways,
+            lineSize: this.lineSize,
+            utilization: ((totalBlocks / this.numBlocks) * 100).toFixed(2) + '%'
         };
-   }
+    }
 }
