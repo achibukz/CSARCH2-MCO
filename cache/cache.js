@@ -69,7 +69,7 @@ class Cache {
     }
 
     /**
-     * Replace a block in cache (remove old, add new)
+     * Replace a block in cache 
      */
     replaceBlock(oldBlock, newBlock, setIndex) {
         const set = this.cache[setIndex];

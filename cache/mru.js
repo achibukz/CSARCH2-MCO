@@ -7,10 +7,10 @@ Updates the order
 
 */
 
-class MRUPolicy {
+class MRU{
     
     constructor(numSets) {
-        this.numSets = numSets;
+        this.numSets = numSets; 
         this.mruOrder = this.initMRU();
     }
 
