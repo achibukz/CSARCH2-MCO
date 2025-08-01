@@ -131,7 +131,16 @@ function runAll() {
     updateStepControls();
     
     addLogMessage('Simulation completed!');
-    
+    const cache = simulator.cache.getCache();
+    const mru = simulator.mru.getAllMRUOrders();
+
+    for (let i = 0; i < cache.length; i++) {
+        const set = cache[i].map(block => block ?? '␀').join(', ');
+        const mruList = mru[i].join(', ');
+        addLogMessage(`Set ${i}: [${set}] | MRU: [${mruList}]`);
+    }
+
+
     // Show final statistics
     const stats = simulator.getStats();
     addLogMessage(`Final Results: ${stats.hits} hits, ${stats.misses} misses, ${stats.hitRate}% hit rate`);
