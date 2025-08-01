@@ -247,6 +247,55 @@ function resetSimulation() {
     document.getElementById('autoStepBtn').classList.remove('secondary');
 }
 
+function resetCache() {
+    simulator.reset();
+    initializeCache();
+
+    simulator.currentSequence = [];
+    simulator.currentStep = -1;
+
+    // Reset cache config inputs to default values
+    document.getElementById('cacheBlocks').value = 8;
+    document.getElementById('lineSize').value = 4;
+
+    // Clear the cache display
+    document.getElementById('cacheTable').innerHTML = '';
+
+    // Reset test case selection and inputs
+    const testCaseSelect = document.getElementById('testCase');
+    testCaseSelect.selectedIndex = 0;
+    document.getElementById('customInput').value = '';
+    document.getElementById('customInputGroup').style.display = 'none';
+
+    // Reset UI states
+    document.getElementById('logContent').innerHTML = 'Cache reset. Load a test case to begin.';
+    updateSequenceDisplay();
+    updateStats();
+    updateCurrentStep();
+    updateStepControls();
+}
+
+function resetTestCase() {
+    // Clear sequence and step
+    simulator.currentSequence = [];
+    simulator.currentStep = -1;
+
+    // Clear UI
+    document.getElementById('sequenceDisplay').innerHTML = '<strong>Sequence:</strong> Load a test case to see the sequence';
+    document.getElementById('logContent').innerHTML = 'Test case reset. Load a new test case to begin.';
+    document.getElementById('customInput').value = '';
+    document.getElementById('customInputGroup').style.display = 'none';
+
+    // Update visuals and stats
+    updateStats();
+    updateCurrentStep();
+    updateStepControls();
+    resetSimulation();  
+
+    const testCaseSelect = document.getElementById('testCase');
+    testCaseSelect.selectedIndex = 0;
+}
+
 function updateCacheDisplay() {
     const cacheTable = document.getElementById('cacheTable');
     if (!simulator.cache) {
@@ -350,6 +399,8 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('autoStepBtn').addEventListener('click', toggleAutoStep);
     document.getElementById('runAllBtn').addEventListener('click', runAll);
     document.getElementById('resetBtn').addEventListener('click', resetSimulation);
+    document.getElementById('reset-cache-btn').addEventListener('click', resetCache);
+    document.getElementById('reset-testcase-btn').addEventListener('click', resetTestCase);
 
     document.getElementById('autoStepSpeed').addEventListener('input', () => {
         const speed = parseInt(document.getElementById('autoStepSpeed').value);
