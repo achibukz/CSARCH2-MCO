@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cache Simulation System - 4-Way BSA + MRU</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Cache Simulation System</h1>
+            <p>4-Way Block Set Associative + MRU Replacement Policy</p>
+        </div>
+
+        <div class="controls">
+            <div class="control-group">
+                <h3>Cache Configuration</h3>
+                <div class="form-group">
+                    <label for="cacheBlocks">Cache Blocks (Power of 2, Min: 4):</label>
+                    <input type="number" id="cacheBlocks" value="8" min="4" max="64" step="4">
+                </div>
+                <div class="form-group">
+                    <label for="lineSize">Line Size (Words, Power of 2, Min: 2):</label>
+                    <input type="number" id="lineSize" value="4" min="2" max="16" step="2">
+                </div>
+                <button class="btn" id="initCacheBtn">Initialize Cache</button>
+            </div>
+
+            <div class="control-group">
+                <h3>Test Cases</h3>
+                <div class="form-group">
+                    <label for="testCase">Select Test Case:</label>
+                    <select id="testCase">
+                        <option value="sequential">Sequential Sequence</option>
+                        <option value="mid-repeat">Mid-Repeat Blocks</option>
+                        <option value="random">Random Sequence</option>
+                        <option value="custom">Custom Sequence</option>
+                    </select>
+                </div>
+                <div class="form-group" id="customInputGroup" style="display: none;">
+                    <label for="customInput">Custom Sequence (comma-separated):</label>
+                    <textarea id="customInput" placeholder="0, 1, 2, 3, 4, 5, 6, 7"></textarea>
+                </div>
+                <button class="btn btn-success" id="loadTestBtn">Load Test Case</button>
+            </div>
+        </div>
+
+        <div class="current-step" id="currentStep">
+            No simulation loaded
+        </div>
+
+        <div class="sequence-display" id="sequenceDisplay">
+            <strong>Sequence:</strong> Load a test case to see the sequence
+        </div>
+
+        <div class="step-controls">
+            <button class="btn btn-secondary" id="prevBtn" disabled>Previous Step</button>
+            <button class="btn" id="nextBtn" disabled>Next Step</button>
+            <button class="btn btn-warning" id="runAllBtn" disabled>Run All</button>
+            <button class="btn btn-secondary" id="resetBtn">Reset</button>
+        </div>
+
+        <div class="simulation-area">
+            <div class="cache-display">
+                <h3>Cache Memory Snapshot</h3>
+                <div id="cacheTable">
+                    <p>Initialize cache to see memory snapshot</p>
+                </div>
+            </div>
+
+            <div class="stats-panel">
+                <h3>Simulation Statistics</h3>
+                <div class="stats-grid" id="statsGrid">
+                    <div class="stat-item">
+                        <div class="stat-value" id="totalAccesses">0</div>
+                        <div class="stat-label">Total Accesses</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="cacheHits">0</div>
+                        <div class="stat-label">Cache Hits</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="cacheMisses">0</div>
+                        <div class="stat-label">Cache Misses</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="hitRate">0.00%</div>
+                        <div class="stat-label">Hit Rate</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="missRate">0.00%</div>
+                        <div class="stat-label">Miss Rate</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="avgAccessTime">0.00ns</div>
+                        <div class="stat-label">Avg Memory Access Time</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="log-panel">
+            <h3>Cache Memory Trace Log</h3>
+            <div class="log-content" id="logContent">
+                System ready. Initialize cache and load a test case to begin simulation.
+            </div>
+        </div>
+    </div>
+
+    <script src="js/cache.js"></script>
+    <script src="js/mru.js"></script>
+    <script src="js/simulator.js"></script>
+    <script src="js/ui.js"></script>
+</body>
+</html>

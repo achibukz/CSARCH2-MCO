@@ -1,34 +1,20 @@
-/*
-
-Idea dump: 
-Cache is handling the cache structure
-Finding the # of blocks
-Adding or Removing blocks from the cache
-Checker for Set and Getters
-
-*/
-
+/**
+ * Cache class implementation
+ * Handles the cache memory structure and operations
+ */
 class Cache {
-    
     constructor(numBlocks, ways, lineSize = 1) {
         this.numBlocks = numBlocks;
         this.ways = ways;
-        this.lineSize = lineSize; // words per cache line
+        this.lineSize = lineSize;
         this.cache = this.initCache();
     }
 
-    /**
-     * Initialize cache structure - array of sets, each set is an array of blocks
-     */
     initCache() {
         const sets = this.numBlocks / this.ways;
         return Array.from({ length: sets }, () => []);
     }
 
-    /**
-     * Find a block in the cache
-     * Returns: { found: boolean, setIndex: number, wayIndex: number }
-     */
     findBlock(block) {
         const setIndex = block % this.cache.length;
         const set = this.cache[setIndex];
@@ -41,23 +27,15 @@ class Cache {
         };
     }
 
-    /**
-     * Add a block to a specific set
-     * Returns: boolean (success/failure)
-     */
     addBlock(block, setIndex) {
         const set = this.cache[setIndex];
         if (set.length < this.ways) {
             set.push(block);
             return true;
         }
-        return false; // Set is full
+        return false;
     }
 
-    /**
-     * Remove a block from cache
-     * Returns: boolean (success/failure)
-     */
     removeBlock(block, setIndex) {
         const set = this.cache[setIndex];
         const blockIndex = set.indexOf(block);
@@ -68,9 +46,6 @@ class Cache {
         return false;
     }
 
-    /**
-     * Replace a block in cache 
-     */
     replaceBlock(oldBlock, newBlock, setIndex) {
         const set = this.cache[setIndex];
         const oldIndex = set.indexOf(oldBlock);
@@ -80,30 +55,18 @@ class Cache {
         set.push(newBlock);
     }
 
-    /**
-     * Get a specific set
-     */
     getSet(setIndex) {
         return this.cache[setIndex];
     }
 
-    /**
-     * Check if a set is full
-     */
     isSetFull(setIndex) {
         return this.cache[setIndex].length >= this.ways;
     }
 
-    /**
-     * Reset cache to initial empty state
-     */
     reset() {
         this.cache = this.initCache();
     }
 
-    /**
-     * Get current cache state (simple copy)
-     */
     getCache() {
         const cacheCopy = [];
         for (let i = 0; i < this.cache.length; i++) {
@@ -115,9 +78,6 @@ class Cache {
         return cacheCopy;
     }
 
-    /**
-     * Get cache statistics
-     */
     getStats() {
         let totalBlocks = 0;
         this.cache.forEach(set => {
