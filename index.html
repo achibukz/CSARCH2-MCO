@@ -54,11 +54,19 @@
             <strong>Sequence:</strong> Load a test case to see the sequence
         </div>
 
+
         <div class="step-controls">
             <button class="btn btn-secondary" id="prevBtn" disabled>Previous Step</button>
             <button class="btn" id="nextBtn" disabled>Next Step</button>
+            <button class="btn btn-info secondary" id="autoStepBtn" disabled>Auto Step: OFF</button>
             <button class="btn btn-warning" id="runAllBtn" disabled>Run All</button>
             <button class="btn btn-secondary" id="resetBtn">Reset</button>
+
+            <div id="autoStepSpeedContainer" style="display: none; margin-top: 10px;">
+                <label for="autoStepSpeed">Speed (ms/step):</label>
+                <input type="range" id="autoStepSpeed" min="100" max="2000" step="100" value="500">
+                <span id="autoStepSpeedValue">500ms</span>
+            </div>
         </div>
 
         <div class="simulation-area">

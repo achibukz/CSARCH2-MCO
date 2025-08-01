@@ -295,3 +295,14 @@ textarea {
         font-size: 2em;
     }
 }
+
+.sequence-display {
+    max-height: 200px;
+    overflow-x: auto;
+    overflow-y: auto;
+    white-space: nowrap;
+    display: block;
+    padding: 10px;
+    border: 1px solid #ccc;
+    background-color: #f9f9f9;
+}
