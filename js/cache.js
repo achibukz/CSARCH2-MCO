@@ -12,7 +12,7 @@ class Cache {
 
     initCache() {
         const sets = this.numBlocks / this.ways;
-        return Array.from({ length: sets }, () => []);
+        return Array.from({ length: sets }, () => Array(this.ways).fill(null));
     }
 
     findBlock(block) {
@@ -29,9 +29,11 @@ class Cache {
 
     addBlock(block, setIndex) {
         const set = this.cache[setIndex];
-        if (set.length < this.ways) {
-            set.push(block);
-            return true;
+        for (let i = 0; i < this.ways; i++) {
+            if (set[i] === null) {
+                set[i] = block;
+                return true;
+            }
         }
         return false;
     }
@@ -40,7 +42,7 @@ class Cache {
         const set = this.cache[setIndex];
         const blockIndex = set.indexOf(block);
         if (blockIndex !== -1) {
-            set.splice(blockIndex, 1);
+            set[blockIndex] = null;
             return true;
         }
         return false;
@@ -50,9 +52,10 @@ class Cache {
         const set = this.cache[setIndex];
         const oldIndex = set.indexOf(oldBlock);
         if (oldIndex !== -1) {
-            set.splice(oldIndex, 1);
+            set[oldIndex] = newBlock;
+        } else {
+            this.addBlock(newBlock, setIndex);
         }
-        set.push(newBlock);
     }
 
     getSet(setIndex) {
@@ -60,7 +63,8 @@ class Cache {
     }
 
     isSetFull(setIndex) {
-        return this.cache[setIndex].length >= this.ways;
+        const set = this.cache[setIndex];
+        return !set.includes(null);
     }
 
     reset() {
@@ -81,7 +85,7 @@ class Cache {
     getStats() {
         let totalBlocks = 0;
         this.cache.forEach(set => {
-            totalBlocks += set.length;
+            totalBlocks += set.filter(block => block !== null).length;
         });
         
         return {

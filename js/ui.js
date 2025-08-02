@@ -314,34 +314,18 @@ function updateCacheDisplay() {
     for (let setIndex = 0; setIndex < cache.length; setIndex++) {
         html += `<tr><td><strong>Set ${setIndex}</strong></td>`;
         
-        const mruOrder = mruOrders[setIndex] || [];
         const setBlocks = cache[setIndex] || [];
         
-        const wayBlocks = new Array(4).fill(undefined);
-        
-        for (let i = 0; i < setBlocks.length && i < 4; i++) {
-            const block = setBlocks[i];
-            const mruPosition = mruOrder.indexOf(block);
-            if (mruPosition !== -1) {
-                wayBlocks[mruPosition] = block;
-            } else {
-                for (let way = 0; way < 4; way++) {
-                    if (wayBlocks[way] === undefined) {
-                        wayBlocks[way] = block;
-                        break;
-                    }
-                }
-            }
-        }
-        
+        // Display blocks in their actual way positions (up to 4 ways)
         for (let way = 0; way < 4; way++) {
             html += '<td>';
-            if (wayBlocks[way] !== undefined) {
-                html += `<div class="cache-block">${wayBlocks[way]}</div>`;
+            if (way < setBlocks.length && setBlocks[way] !== null && setBlocks[way] !== undefined) {
+                html += `<div class="cache-block">${setBlocks[way]}</div>`;
             }
             html += '</td>';
         }
         
+        // Display MRU order separately
         html += '<td>';
         if (mruOrders[setIndex] && mruOrders[setIndex].length > 0) {
             html += `<div class="mru-order">LRU ← [${mruOrders[setIndex].join(', ')}] → MRU</div>`;
