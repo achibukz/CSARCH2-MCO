@@ -144,7 +144,19 @@ function runAll() {
     if (!simulator.currentSequence.length) return alert('Please load a test case first');
 
     addLogMessage('Running all remaining steps...');
+
+    // 🔐 Track step before running
+    simulator.currentStepBeforeRun = simulator.currentStep;
+
     simulator.runAll();
+
+    // ✅ Only show newly added logs
+    for (let i = simulator.currentStepBeforeRun + 1; i <= simulator.currentStep; i++) {
+        const entry = simulator.log[i];
+        if (entry) {
+            addLogMessage(`Step ${entry.step}: ${entry.explanation}`);
+        }
+    }
 
     updateCacheDisplay();
     updateStats();
@@ -153,6 +165,7 @@ function runAll() {
     updateStepControls();
 
     addLogMessage('Simulation completed!');
+
     const cache = simulator.cache.getCache();
     const mru = simulator.mru.getAllMRUOrders();
 
