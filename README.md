@@ -137,6 +137,8 @@ The simulation produces performance metrics for each test case. These metrics he
 
 ### 5.4 Example Screenshot
 
+![Example Screenshot](example_screenshot.png)
+
 ## 6. Analysis of Test Results  
 
 The cache simulation results highlight how different access patterns interact with a **4-way set associative cache** using the **MRU replacement policy**.  
