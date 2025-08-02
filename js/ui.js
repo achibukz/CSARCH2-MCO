@@ -333,6 +333,7 @@ function updateStats() {
     document.getElementById('hitRate').textContent = stats.hitRate + '%';
     document.getElementById('missRate').textContent = stats.missRate + '%';
     document.getElementById('avgAccessTime').textContent = stats.averageMemoryAccessTime + 'ns';
+    document.getElementById('totalAccessTime').textContent = stats.totalMemoryAccessTime + 'ns';
 }
 
 function updateCurrentStep() {
