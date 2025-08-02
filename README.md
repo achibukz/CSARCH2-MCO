@@ -10,6 +10,11 @@ The purpose of this case study is to:
 ### 1.1 Demo Link
 [Google Drive Link](https://drive.google.com/file/d/1QtfwOfn_fEatLiSHlxuUQUMgrb3zLo7c/view?usp=sharing)
 
+### 1.2 How to Build
+```
+python -m http.server 3000
+```
+
 ## 2. System Specifications
 The cache simulation system follows these specifications:
 
