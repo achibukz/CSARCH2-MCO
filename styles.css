@@ -5,8 +5,8 @@
 }
 
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #317d44;
     min-height: 100vh;
     padding: 20px;
 }
@@ -14,10 +14,10 @@ body {
 .container {
     max-width: 1400px;
     margin: 0 auto;
-    background: rgba(255, 255, 255, 0.95);
-    border-radius: 20px;
+    background: #ffffff;
+    border-radius: 15px;
     padding: 30px;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.05);
 }
 
 .header {
@@ -26,16 +26,13 @@ body {
 }
 
 .header h1 {
-    color: #2c3e50;
+    color: #444a4f;
     font-size: 2.5em;
     margin-bottom: 10px;
-    background: linear-gradient(45deg, #667eea, #764ba2);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
 }
 
 .header p {
-    color: #7f8c8d;
+    color: #6c757d;
     font-size: 1.1em;
 }
 
@@ -47,14 +44,14 @@ body {
 }
 
 .control-group {
-    background: #f8f9fa;
+    background: #f6fff9;
     padding: 20px;
-    border-radius: 15px;
-    border: 2px solid #e9ecef;
+    border-radius: 12px;
+    border: 2px solid #d4edda;
 }
 
 .control-group h3 {
-    color: #2c3e50;
+    color: #155724;
     margin-bottom: 15px;
     font-size: 1.2em;
 }
@@ -66,14 +63,14 @@ body {
 label {
     display: block;
     margin-bottom: 5px;
-    color: #495057;
+    color: #155724;
     font-weight: 500;
 }
 
 input, select, textarea {
     width: 100%;
     padding: 10px;
-    border: 2px solid #dee2e6;
+    border: 2px solid #ced4da;
     border-radius: 8px;
     font-size: 14px;
     transition: border-color 0.3s ease;
@@ -81,7 +78,7 @@ input, select, textarea {
 
 input:focus, select:focus, textarea:focus {
     outline: none;
-    border-color: #667eea;
+    border-color: #317d44;
 }
 
 textarea {
@@ -90,7 +87,7 @@ textarea {
 }
 
 .btn {
-    background: linear-gradient(45deg, #667eea, #764ba2);
+    background: #317d44;
     color: white;
     border: none;
     padding: 12px 20px;
@@ -98,30 +95,30 @@ textarea {
     cursor: pointer;
     font-size: 14px;
     font-weight: 500;
-    transition: transform 0.2s ease;
+    transition: background-color 0.2s ease;
     margin: 5px;
 }
 
 .btn:hover {
-    transform: translateY(-2px);
+    background-color: #218838;
 }
 
 .btn:disabled {
-    background: #6c757d;
+    background: #adb5bd;
     cursor: not-allowed;
-    transform: none;
 }
 
 .btn-secondary {
-    background: linear-gradient(45deg, #6c757d, #495057);
+    background: #6c757d;
 }
 
 .btn-success {
-    background: linear-gradient(45deg, #28a745, #20c997);
+    background: #317d44;
 }
 
 .btn-warning {
-    background: linear-gradient(45deg, #ffc107, #fd7e14);
+    background: #ffc107;
+    color: black;
 }
 
 .simulation-area {
@@ -132,14 +129,14 @@ textarea {
 }
 
 .cache-display {
-    background: #f8f9fa;
+    background: #f6fff9;
     padding: 20px;
-    border-radius: 15px;
-    border: 2px solid #e9ecef;
+    border-radius: 12px;
+    border: 2px solid #d4edda;
 }
 
 .cache-display h3 {
-    color: #2c3e50;
+    color: #155724;
     margin-bottom: 15px;
     text-align: center;
 }
@@ -158,23 +155,22 @@ textarea {
 }
 
 .cache-table th {
-    background: linear-gradient(45deg, #667eea, #764ba2);
+    background: #28a745;
     color: white;
     font-weight: 600;
 }
 
 .cache-table td {
     background: white;
-    min-height: 40px;
 }
 
 .cache-block {
-    background: #e3f2fd;
+    background: #d4edda;
     padding: 5px 10px;
     margin: 2px;
     border-radius: 5px;
     display: inline-block;
-    border: 1px solid #2196f3;
+    border: 1px solid #28a745;
     font-weight: 500;
 }
 
@@ -185,10 +181,10 @@ textarea {
 }
 
 .stats-panel {
-    background: #f8f9fa;
+    background: #f6fff9;
     padding: 20px;
-    border-radius: 15px;
-    border: 2px solid #e9ecef;
+    border-radius: 12px;
+    border: 2px solid #d4edda;
 }
 
 .stats-grid {
@@ -202,13 +198,13 @@ textarea {
     padding: 15px;
     border-radius: 10px;
     text-align: center;
-    border: 2px solid #e9ecef;
+    border: 2px solid #d4edda;
 }
 
 .stat-value {
     font-size: 1.5em;
     font-weight: bold;
-    color: #667eea;
+    color: #28a745;
 }
 
 .stat-label {
@@ -219,20 +215,20 @@ textarea {
 
 .log-panel {
     margin-top: 30px;
-    background: #f8f9fa;
+    background: #f6fff9;
     padding: 20px;
-    border-radius: 15px;
-    border: 2px solid #e9ecef;
+    border-radius: 12px;
+    border: 2px solid #d4edda;
 }
 
 .log-content {
-    background: #2c3e50;
-    color: #ecf0f1;
+    background: #1b1e21;
+    color: #e9ecef;
     padding: 15px;
     border-radius: 8px;
     max-height: 300px;
     overflow-y: auto;
-    font-family: 'Courier New', monospace;
+    font-family: Arial, Helvetica, sans-serif;
     font-size: 13px;
     line-height: 1.4;
 }
@@ -259,15 +255,20 @@ textarea {
     padding: 15px;
     border-radius: 8px;
     margin: 15px 0;
-    border: 2px solid #e9ecef;
+    border: 2px solid #ced4da;
+    max-height: 200px;
+    overflow-x: auto;
+    overflow-y: auto;
+    white-space: nowrap;
+    display: block;
 }
 
 .sequence-item {
     display: inline-block;
     padding: 5px 10px;
     margin: 2px;
-    background: #f8f9fa;
-    border: 1px solid #dee2e6;
+    background: #f1f3f5;
+    border: 1px solid #ced4da;
     border-radius: 5px;
 }
 
@@ -286,23 +287,12 @@ textarea {
     .simulation-area {
         grid-template-columns: 1fr;
     }
-    
+
     .controls {
         grid-template-columns: 1fr;
     }
-    
+
     .header h1 {
         font-size: 2em;
     }
-}
-
-.sequence-display {
-    max-height: 200px;
-    overflow-x: auto;
-    overflow-y: auto;
-    white-space: nowrap;
-    display: block;
-    padding: 10px;
-    border: 1px solid #ccc;
-    background-color: #f9f9f9;
 }
