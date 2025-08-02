@@ -298,29 +298,59 @@ function resetTestCase() {
 
 function updateCacheDisplay() {
     const cacheTable = document.getElementById('cacheTable');
+    
     if (!simulator.cache) {
         cacheTable.innerHTML = '<p>Initialize cache to see memory snapshot</p>';
         return;
     }
-
+    
     const cache = simulator.cache.getCache();
-    const mruOrders = simulator.mru?.getAllMRUOrders() ?? [];
-
+    const mruOrders = simulator.mru ? simulator.mru.getAllMRUOrders() : [];
+    
     let html = '<table class="cache-table">';
-    html += '<thead><tr><th>Set</th><th>Way 0</th><th>Way 1</th><th>Way 2</th><th>Way 3</th><th>MRU Order</th></tr></thead><tbody>';
-
+    html += '<thead><tr><th>Set</th><th>Way 0</th><th>Way 1</th><th>Way 2</th><th>Way 3</th><th>MRU Order</th></tr></thead>';
+    html += '<tbody>';
+    
     for (let setIndex = 0; setIndex < cache.length; setIndex++) {
         html += `<tr><td><strong>Set ${setIndex}</strong></td>`;
+        
+        const mruOrder = mruOrders[setIndex] || [];
+        const setBlocks = cache[setIndex] || [];
+        
+        const wayBlocks = new Array(4).fill(undefined);
+        
+        for (let i = 0; i < setBlocks.length && i < 4; i++) {
+            const block = setBlocks[i];
+            const mruPosition = mruOrder.indexOf(block);
+            if (mruPosition !== -1) {
+                wayBlocks[mruPosition] = block;
+            } else {
+                for (let way = 0; way < 4; way++) {
+                    if (wayBlocks[way] === undefined) {
+                        wayBlocks[way] = block;
+                        break;
+                    }
+                }
+            }
+        }
+        
         for (let way = 0; way < 4; way++) {
             html += '<td>';
-            if (cache[setIndex][way] !== undefined) {
-                html += `<div class="cache-block">${cache[setIndex][way]}</div>`;
+            if (wayBlocks[way] !== undefined) {
+                html += `<div class="cache-block">${wayBlocks[way]}</div>`;
             }
             html += '</td>';
         }
-        html += `<td><div class="mru-order">LRU ← [${mruOrders[setIndex]?.join(', ') ?? ''}] → MRU</div></td></tr>`;
+        
+        html += '<td>';
+        if (mruOrders[setIndex] && mruOrders[setIndex].length > 0) {
+            html += `<div class="mru-order">LRU ← [${mruOrders[setIndex].join(', ')}] → MRU</div>`;
+        }
+        html += '</td>';
+        
+        html += '</tr>';
     }
-
+    
     html += '</tbody></table>';
     cacheTable.innerHTML = html;
 }
