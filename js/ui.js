@@ -380,6 +380,7 @@ function updateStepControls() {
     document.getElementById('prevBtn').disabled = !canGoPrev;
     document.getElementById('nextBtn').disabled = !canGoNext || !hasSequence;
     document.getElementById('runAllBtn').disabled = !canGoNext || !hasSequence;
+    document.getElementById('autoStepBtn').disabled = !canGoNext || !hasSequence;
 }
 
 function addLogMessage(message) {
