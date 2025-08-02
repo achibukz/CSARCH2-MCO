@@ -321,7 +321,7 @@ function updateCacheDisplay() {
     const mruOrders = simulator.mru ? simulator.mru.getAllMRUOrders() : [];
     
     let html = '<table class="cache-table">';
-    html += '<thead><tr><th>Set</th><th>Way 0</th><th>Way 1</th><th>Way 2</th><th>Way 3</th><th>MRU Order</th></tr></thead>';
+    html += '<thead><tr><th>Set</th><th>Block 0</th><th>Block 1</th><th>Block 2</th><th>Block 3</th><th>MRU Order</th></tr></thead>';
     html += '<tbody>';
     
     for (let setIndex = 0; setIndex < cache.length; setIndex++) {
