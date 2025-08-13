@@ -6,7 +6,9 @@ class Simulator {
     constructor() {
         this.memoryBlocks = 1024;
         this.cache = null;
-        this.mru = null;
+        this.replacementPolicy = null;
+        this.replacementType = 'mru'; // 'mru', 'lru', 'fifo'
+        this.mappingAlgorithm = 'set-associative'; // 'direct', 'set-associative', 'fully-associative'
         this.log = [];
         this.currentSequence = [];
         this.currentStep = -1;
@@ -16,9 +18,34 @@ class Simulator {
         this.memoryAccessTime = 10;
     }
 
-    initCache(numBlocks, ways, lineSize = 1) {
+    initCache(numBlocks, ways, lineSize = 1, mappingAlgorithm = 'set-associative', replacementType = 'mru') {
+        this.mappingAlgorithm = mappingAlgorithm;
+        this.replacementType = replacementType;
+        
+        // Adjust ways based on mapping algorithm
+        if (mappingAlgorithm === 'direct') {
+            ways = 1;
+        } else if (mappingAlgorithm === 'fully-associative') {
+            ways = numBlocks;
+        }
+        
         this.cache = new Cache(numBlocks, ways, lineSize);
-        this.mru = new MRU(numBlocks / ways);
+        
+        // Initialize replacement policy based on type
+        const numSets = numBlocks / ways;
+        switch (replacementType) {
+            case 'lru':
+                this.replacementPolicy = new LRU(numSets);
+                break;
+            case 'fifo':
+                this.replacementPolicy = new FIFO(numSets);
+                break;
+            case 'mru':
+            default:
+                this.replacementPolicy = new MRU(numSets);
+                break;
+        }
+        
         this.stepHistory = [];
         this.currentStep = -1;
         this.log = [];
@@ -39,7 +66,7 @@ class Simulator {
         return copy;
     }
 
-    accessCacheStep(block, ways, stepNum) {
+    accessCacheStep(block, stepNum) {
         const findResult = this.cache.findBlock(block);
         const setIndex = findResult.setIndex;
         
@@ -47,17 +74,18 @@ class Simulator {
         let removedBlock = null;
 
         if (hit) {
-            this.mru.updateMRU(block, setIndex);
+            // Update replacement policy for hit
+            this.updateReplacementPolicy(block, setIndex);
         } else {
             if (!this.cache.isSetFull(setIndex)) {
                 this.cache.addBlock(block, setIndex);
             } else {
-                removedBlock = this.mru.getBlockToEvict(setIndex);
+                removedBlock = this.getBlockToEvict(setIndex);
                 this.cache.removeBlock(removedBlock, setIndex);
-                this.mru.removeFromMRU(removedBlock, setIndex);
+                this.removeFromReplacementPolicy(removedBlock, setIndex);
                 this.cache.addBlock(block, setIndex);
             }
-            this.mru.updateMRU(block, setIndex);
+            this.updateReplacementPolicy(block, setIndex);
         }
 
         let result = hit ? 'HIT' : 'MISS';
@@ -70,7 +98,7 @@ class Simulator {
             setIndex: setIndex,
             result: result,
             removed: removedBlock,
-            explanation: this.mru.generateExplanation(block, setIndex, hit, removedBlock)
+            explanation: this.generateExplanation(block, setIndex, hit, removedBlock)
         });
 
         return hit;
@@ -84,8 +112,75 @@ class Simulator {
             hitStatus: hitStatus,
             removedBlock: removedBlock,
             cacheState: this.copyArray(this.cache.getCache()),
-            mruState: this.copyArray(this.mru.getAllMRUOrders())
+            replacementState: this.copyArray(this.getAllReplacementOrders())
         };
+    }
+
+    updateReplacementPolicy(block, setIndex) {
+        switch (this.replacementType) {
+            case 'lru':
+                this.replacementPolicy.updateLRU(block, setIndex);
+                break;
+            case 'fifo':
+                this.replacementPolicy.updateFIFO(block, setIndex);
+                break;
+            case 'mru':
+            default:
+                this.replacementPolicy.updateMRU(block, setIndex);
+                break;
+        }
+    }
+
+    getBlockToEvict(setIndex) {
+        return this.replacementPolicy.getBlockToEvict(setIndex);
+    }
+
+    removeFromReplacementPolicy(block, setIndex) {
+        switch (this.replacementType) {
+            case 'lru':
+                this.replacementPolicy.removeFromLRU(block, setIndex);
+                break;
+            case 'fifo':
+                this.replacementPolicy.removeFromFIFO(block, setIndex);
+                break;
+            case 'mru':
+            default:
+                this.replacementPolicy.removeFromMRU(block, setIndex);
+                break;
+        }
+    }
+
+    generateExplanation(block, setIndex, isHit, removedBlock) {
+        if (this.mappingAlgorithm === 'direct') {
+            // For direct mapping, explain the modulo operation
+            let explanation = `Access block ${block} → Set ${setIndex} (${block} mod ${this.cache.cache.length}). `;
+            
+            if (isHit) {
+                explanation += `HIT! Block ${block} found in cache.`;
+            } else {
+                if (removedBlock !== null) {
+                    explanation += `MISS! Replaced block ${removedBlock} with block ${block}.`;
+                } else {
+                    explanation += `MISS! Loaded block ${block} into empty cache slot.`;
+                }
+            }
+            return explanation;
+        } else {
+            // For set associative and fully associative, use the replacement policy explanation
+            return this.replacementPolicy.generateExplanation(block, setIndex, isHit, removedBlock);
+        }
+    }
+
+    getAllReplacementOrders() {
+        switch (this.replacementType) {
+            case 'lru':
+                return this.replacementPolicy.getAllLRUOrders();
+            case 'fifo':
+                return this.replacementPolicy.getAllFIFOOrders();
+            case 'mru':
+            default:
+                return this.replacementPolicy.getAllMRUOrders();
+        }
     }
 
     loadSequentialTest(numBlocks) {
@@ -139,9 +234,10 @@ class Simulator {
         return this.currentSequence;
     }
 
-    loadTestCase(testName, numBlocks, lineSize = 1, customInput = null) {
+    loadTestCase(testName, numBlocks, ways, lineSize = 1, mappingAlgorithm = 'set-associative', replacementType = 'mru', customInput = null) {
         numBlocks = numBlocks || 8;
-        this.initCache(numBlocks, 4, lineSize);
+        ways = ways || 4;
+        this.initCache(numBlocks, ways, lineSize, mappingAlgorithm, replacementType);
         
         if (testName === 'Sequential Test' || testName === 'sequential') {
             this.loadSequentialTest(numBlocks);
@@ -168,7 +264,7 @@ class Simulator {
 
         this.currentStep++;
         const block = this.currentSequence[this.currentStep];
-        const hit = this.accessCacheStep(block, 4, this.currentStep + 1);
+        const hit = this.accessCacheStep(block, this.currentStep + 1);
         
         return true;
     }
@@ -181,13 +277,26 @@ class Simulator {
         if (this.currentStep >= 0) {
             const stepData = this.stepHistory[this.currentStep];
             this.cache.cache = this.copyArray(stepData.cacheState);
-            this.mru.mruOrder = this.copyArray(stepData.mruState);
+            
+            // Restore replacement policy state
+            switch (this.replacementType) {
+                case 'lru':
+                    this.replacementPolicy.lruOrder = this.copyArray(stepData.replacementState);
+                    break;
+                case 'fifo':
+                    this.replacementPolicy.fifoOrder = this.copyArray(stepData.replacementState);
+                    break;
+                case 'mru':
+                default:
+                    this.replacementPolicy.mruOrder = this.copyArray(stepData.replacementState);
+                    break;
+            }
             
             this.stepHistory = this.stepHistory.slice(0, this.currentStep + 1);
             this.log = this.log.slice(0, this.currentStep + 1);
         } else {
             this.cache.reset();
-            this.mru.reset();
+            this.replacementPolicy.reset();
             this.stepHistory = [];
             this.log = [];
         }
@@ -203,7 +312,7 @@ class Simulator {
 
     reset() {
         if (this.cache) this.cache.reset();
-        if (this.mru) this.mru.reset();
+        if (this.replacementPolicy) this.replacementPolicy.reset();
         this.currentStep = -1;
         this.stepHistory = [];
         this.log = [];
@@ -258,23 +367,25 @@ class Simulator {
 
     getState() {
         let cache = [];
-        let mruOrder = [];
+        let replacementOrder = [];
 
         if (this.cache) {
             cache = this.cache.getCache();
         }
 
-        if (this.mru) {
-            mruOrder = this.mru.getAllMRUOrders();
+        if (this.replacementPolicy) {
+            replacementOrder = this.getAllReplacementOrders();
         }
 
         return {
             cache: cache,
-            mruOrder: mruOrder,
+            replacementOrder: replacementOrder,
             currentStep: this.currentStep,
             sequence: this.currentSequence,
             log: this.log,
-            stats: this.getStats()
+            stats: this.getStats(),
+            mappingAlgorithm: this.mappingAlgorithm,
+            replacementType: this.replacementType
         };
     }
 

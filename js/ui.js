@@ -6,12 +6,60 @@ let isAutoStepping = false;
 let autoStepDelay = 500;
 
 // UI Functions
+function onMappingAlgorithmChange() {
+    const mappingAlgorithm = document.getElementById('mappingAlgorithm').value;
+    const blocksPerSetGroup = document.getElementById('blocksPerSetGroup');
+    const replacementPolicyGroup = document.getElementById('replacementPolicyGroup');
+    const cacheBlocks = parseInt(document.getElementById('cacheBlocks').value) || 8;
+    
+    if (mappingAlgorithm === 'direct') {
+        // Direct mapping: 1 block per set, hide blocks per set input
+        blocksPerSetGroup.style.display = 'none';
+        document.getElementById('blocksPerSet').value = 1;
+        // Hide replacement policy since direct mapping has no choice in replacement
+        replacementPolicyGroup.style.display = 'none';
+        document.getElementById('replacementPolicy').value = 'fifo'; // Set to FIFO as default (though it doesn't matter)
+    } else if (mappingAlgorithm === 'fully-associative') {
+        // Fully associative: all blocks in one set, hide blocks per set input
+        blocksPerSetGroup.style.display = 'none';
+        document.getElementById('blocksPerSet').value = cacheBlocks;
+        replacementPolicyGroup.style.display = 'block';
+    } else {
+        // Set associative: show blocks per set input
+        blocksPerSetGroup.style.display = 'block';
+        replacementPolicyGroup.style.display = 'block';
+        if (document.getElementById('blocksPerSet').value == 1 || document.getElementById('blocksPerSet').value == cacheBlocks) {
+            document.getElementById('blocksPerSet').value = 4; // Reset to reasonable default
+        }
+    }
+}
+
 function initializeCache() {
     const cacheBlocks = parseInt(document.getElementById('cacheBlocks').value);
+    const mappingAlgorithm = document.getElementById('mappingAlgorithm').value;
+    const replacementPolicy = document.getElementById('replacementPolicy').value;
     const lineSize = parseInt(document.getElementById('lineSize').value);
+    let blocksPerSet = parseInt(document.getElementById('blocksPerSet').value);
+    
+    // Adjust blocks per set based on mapping algorithm
+    if (mappingAlgorithm === 'direct') {
+        blocksPerSet = 1;
+    } else if (mappingAlgorithm === 'fully-associative') {
+        blocksPerSet = cacheBlocks;
+    }
     
     if (!isPowerOfTwo(cacheBlocks) || cacheBlocks < 4) {
         alert('Cache blocks must be a power of 2 and at least 4');
+        return;
+    }
+    
+    if (mappingAlgorithm === 'set-associative' && !isValidBlocksPerSet(blocksPerSet, cacheBlocks)) {
+        alert('Blocks per set must be 1 (direct mapped) or a power of 2 that divides evenly into cache blocks');
+        return;
+    }
+    
+    if (cacheBlocks % blocksPerSet !== 0) {
+        alert('Cache blocks must be divisible by blocks per set');
         return;
     }
     
@@ -20,14 +68,36 @@ function initializeCache() {
         return;
     }
     
-    simulator.initCache(cacheBlocks, 4, lineSize);
+    simulator.initCache(cacheBlocks, blocksPerSet, lineSize, mappingAlgorithm, replacementPolicy);
     updateCacheDisplay();
     updateStats();
-    addLogMessage(`Cache initialized: ${cacheBlocks} blocks, 4-way associative, ${lineSize} words per line`);
+    
+    const mappingType = mappingAlgorithm === 'direct' ? 'Direct Mapped' : 
+                       mappingAlgorithm === 'fully-associative' ? 'Fully Associative' : 
+                       `${blocksPerSet}-way Set Associative`;
+    
+    let logMessage = `Cache initialized: ${cacheBlocks} blocks, ${mappingType}`;
+    
+    // Only mention replacement policy for non-direct mapping
+    if (mappingAlgorithm !== 'direct') {
+        const policyName = replacementPolicy.toUpperCase();
+        logMessage += `, ${policyName} replacement`;
+    }
+    
+    logMessage += `, ${lineSize} words per line`;
+    
+    addLogMessage(logMessage);
 }
 
 function isPowerOfTwo(n) {
     return n > 0 && (n & (n - 1)) === 0;
+}
+
+function isValidBlocksPerSet(blocksPerSet, cacheBlocks) {
+    // Allow 1 (direct mapping) even though it's not practical for our current implementation
+    if (blocksPerSet === 1) return true;
+    // For other values, check if it's a power of 2 and divides evenly into cache blocks
+    return isPowerOfTwo(blocksPerSet) && cacheBlocks % blocksPerSet === 0;
 }
 
 function onTestCaseChange() {
@@ -53,12 +123,20 @@ function autoStepTick() {
     if (!hasNext) {
         stopAutoStep(false);
         const cache = simulator.cache.getCache();
-        const mru = simulator.mru.getAllMRUOrders();
+        const replacementOrders = simulator.getAllReplacementOrders();
 
         for (let i = 0; i < cache.length; i++) {
             const set = cache[i].map(block => block ?? '␀').join(', ');
-            const mruList = mru[i].join(', ');
-            addLogMessage(`Set ${i}: [${set}] | MRU: [${mruList}]`);
+            let logMessage = `Set ${i}: [${set}]`;
+            
+            // Only show replacement order for non-direct mapping
+            if (simulator.mappingAlgorithm !== 'direct') {
+                const orderList = replacementOrders[i].join(', ');
+                const policyName = simulator.replacementType.toUpperCase();
+                logMessage += ` | ${policyName}: [${orderList}]`;
+            }
+            
+            addLogMessage(logMessage);
         }
 
         const stats = simulator.getStats();
@@ -74,8 +152,18 @@ function loadTestCase() {
 
     const testCase = document.getElementById('testCase').value;
     const cacheBlocks = parseInt(document.getElementById('cacheBlocks').value);
+    const mappingAlgorithm = document.getElementById('mappingAlgorithm').value;
+    const replacementPolicy = document.getElementById('replacementPolicy').value;
     const lineSize = parseInt(document.getElementById('lineSize').value);
+    let blocksPerSet = parseInt(document.getElementById('blocksPerSet').value);
     let customInput = '';
+
+    // Adjust blocks per set based on mapping algorithm
+    if (mappingAlgorithm === 'direct') {
+        blocksPerSet = 1;
+    } else if (mappingAlgorithm === 'fully-associative') {
+        blocksPerSet = cacheBlocks;
+    }
 
     if (testCase === 'custom') {
         customInput = document.getElementById('customInput').value;
@@ -85,7 +173,7 @@ function loadTestCase() {
         }
     }
 
-    simulator.loadTestCase(testCase, cacheBlocks, lineSize, customInput);
+    simulator.loadTestCase(testCase, cacheBlocks, blocksPerSet, lineSize, mappingAlgorithm, replacementPolicy, customInput);
     simulator.startStepping();
 
     updateSequenceDisplay();
@@ -167,12 +255,20 @@ function runAll() {
     addLogMessage('Simulation completed!');
 
     const cache = simulator.cache.getCache();
-    const mru = simulator.mru.getAllMRUOrders();
+    const replacementOrders = simulator.getAllReplacementOrders();
 
     for (let i = 0; i < cache.length; i++) {
         const set = cache[i].map(block => block ?? '␀').join(', ');
-        const mruList = mru[i].join(', ');
-        addLogMessage(`Set ${i}: [${set}] | MRU: [${mruList}]`);
+        let logMessage = `Set ${i}: [${set}]`;
+        
+        // Only show replacement order for non-direct mapping
+        if (simulator.mappingAlgorithm !== 'direct') {
+            const orderList = replacementOrders[i].join(', ');
+            const policyName = simulator.replacementType.toUpperCase();
+            logMessage += ` | ${policyName}: [${orderList}]`;
+        }
+        
+        addLogMessage(logMessage);
     }
 
     const stats = simulator.getStats();
@@ -211,12 +307,13 @@ function toggleAutoStep() {
                 updateStats();
 
                 const cache = simulator.cache.getCache();
-                const mru = simulator.mru.getAllMRUOrders();
+                const replacementOrders = simulator.getAllReplacementOrders();
 
                 for (let i = 0; i < cache.length; i++) {
                     const set = cache[i].map(block => block ?? '␀').join(', ');
-                    const mruList = mru[i].join(', ');
-                    addLogMessage(`Set ${i}: [${set}] | MRU: [${mruList}]`);
+                    const orderList = replacementOrders[i].join(', ');
+                    const policyName = simulator.replacementType.toUpperCase();
+                    addLogMessage(`Set ${i}: [${set}] | ${policyName}: [${orderList}]`);
                 }
 
                 const stats = simulator.getStats();
@@ -262,14 +359,22 @@ function resetSimulation() {
 
 function resetCache() {
     simulator.reset();
+    
+    // Reset cache config inputs to default values
+    document.getElementById('cacheBlocks').value = 8;
+    document.getElementById('mappingAlgorithm').value = 'set-associative';
+    document.getElementById('blocksPerSet').value = 4;
+    document.getElementById('replacementPolicy').value = 'mru';
+    document.getElementById('lineSize').value = 4;
+
+    // Update UI based on mapping algorithm
+    onMappingAlgorithmChange();
+    
+    // Initialize the cache after resetting values
     initializeCache();
 
     simulator.currentSequence = [];
     simulator.currentStep = -1;
-
-    // Reset cache config inputs to default values
-    document.getElementById('cacheBlocks').value = 8;
-    document.getElementById('lineSize').value = 4;
 
     // Clear the cache display
     document.getElementById('cacheTable').innerHTML = '';
@@ -318,10 +423,25 @@ function updateCacheDisplay() {
     }
     
     const cache = simulator.cache.getCache();
-    const mruOrders = simulator.mru ? simulator.mru.getAllMRUOrders() : [];
+    const replacementOrders = simulator.replacementPolicy ? simulator.getAllReplacementOrders() : [];
+    const ways = simulator.cache.ways;
+    const replacementType = simulator.replacementType.toUpperCase();
+    const mappingAlgorithm = simulator.mappingAlgorithm;
     
     let html = '<table class="cache-table">';
-    html += '<thead><tr><th>Set</th><th>Block 0</th><th>Block 1</th><th>Block 2</th><th>Block 3</th><th>MRU Order</th></tr></thead>';
+    html += '<thead><tr><th>Set</th>';
+    
+    // Dynamic number of way columns based on actual ways
+    for (let way = 0; way < ways; way++) {
+        html += `<th>Block ${way}</th>`;
+    }
+    
+    // Only show replacement order column for set associative and fully associative
+    if (mappingAlgorithm !== 'direct') {
+        html += `<th>${replacementType} Order</th>`;
+    }
+    
+    html += '</tr></thead>';
     html += '<tbody>';
     
     for (let setIndex = 0; setIndex < cache.length; setIndex++) {
@@ -329,8 +449,8 @@ function updateCacheDisplay() {
         
         const setBlocks = cache[setIndex] || [];
         
-        // Display blocks in their actual way positions (up to 4 ways)
-        for (let way = 0; way < 4; way++) {
+        // Display blocks in their actual way positions
+        for (let way = 0; way < ways; way++) {
             html += '<td>';
             if (way < setBlocks.length && setBlocks[way] !== null && setBlocks[way] !== undefined) {
                 html += `<div class="cache-block">${setBlocks[way]}</div>`;
@@ -338,12 +458,22 @@ function updateCacheDisplay() {
             html += '</td>';
         }
         
-        // Display MRU order separately
-        html += '<td>';
-        if (mruOrders[setIndex] && mruOrders[setIndex].length > 0) {
-            html += `<div class="mru-order">LRU ← [${mruOrders[setIndex].join(', ')}] → MRU</div>`;
+        // Display replacement order separately (only for non-direct mapping)
+        if (mappingAlgorithm !== 'direct') {
+            html += '<td>';
+            if (replacementOrders[setIndex] && replacementOrders[setIndex].length > 0) {
+                let orderLabel = '';
+                if (replacementType === 'LRU') {
+                    orderLabel = 'LRU ← [' + replacementOrders[setIndex].join(', ') + '] → MRU';
+                } else if (replacementType === 'FIFO') {
+                    orderLabel = 'Oldest ← [' + replacementOrders[setIndex].join(', ') + '] → Newest';
+                } else { // MRU
+                    orderLabel = 'LRU ← [' + replacementOrders[setIndex].join(', ') + '] → MRU';
+                }
+                html += `<div class="replacement-order">${orderLabel}</div>`;
+            }
+            html += '</td>';
         }
-        html += '</td>';
         
         html += '</tr>';
     }
@@ -420,6 +550,7 @@ function addLogMessage(message) {
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', function () {
+    document.getElementById('mappingAlgorithm').addEventListener('change', onMappingAlgorithmChange);
     document.getElementById('initCacheBtn').addEventListener('click', initializeCache);
     document.getElementById('testCase').addEventListener('change', onTestCaseChange);
     document.getElementById('loadTestBtn').addEventListener('click', loadTestCase);
@@ -442,6 +573,8 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
+    // Initialize UI state
+    onMappingAlgorithmChange();
     addLogMessage('Cache Simulation System initialized');
     addLogMessage('Configure cache parameters and load a test case to begin');
     updateStepControls();

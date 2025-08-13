@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cache Simulation System - 4-Way BSA + MRU</title>
+    <title>Cache Simulation System - Multi-Algorithm + Multi-Policy</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="container">
         <div class="header">
             <h1>Cache Simulation System</h1>
-            <p>4-Way Block Set Associative + MRU Replacement Algorithm</p>
+            <p>Direct Mapping, Set Associative & Fully Associative + Multiple Replacement Algorithms</p>
         </div>
 
         <div class="controls">
@@ -19,6 +19,26 @@
                 <div class="form-group">
                     <label for="cacheBlocks">Cache Blocks (Power of 2, Min: 4):</label>
                     <input type="number" id="cacheBlocks" value="8" min="4" max="64" step="4">
+                </div>
+                <div class="form-group">
+                    <label for="mappingAlgorithm">Mapping Algorithm:</label>
+                    <select id="mappingAlgorithm">
+                        <option value="direct">Direct Mapping</option>
+                        <option value="set-associative" selected>Set Associative</option>
+                        <option value="fully-associative">Fully Associative</option>
+                    </select>
+                </div>
+                <div class="form-group" id="blocksPerSetGroup">
+                    <label for="blocksPerSet">Blocks per Set (Power of 2):</label>
+                    <input type="number" id="blocksPerSet" value="4" min="1" max="16" step="1">
+                </div>
+                <div class="form-group" id="replacementPolicyGroup">
+                    <label for="replacementPolicy">Replacement Policy:</label>
+                    <select id="replacementPolicy">
+                        <option value="mru" selected>MRU (Most Recently Used)</option>
+                        <option value="lru">LRU (Least Recently Used)</option>
+                        <option value="fifo">FIFO (First In First Out)</option>
+                    </select>
                 </div>
                 <div class="form-group">
                     <label for="lineSize">Line Size (Words, Power of 2, Min: 2):</label>
@@ -124,6 +144,8 @@
 
     <script src="js/cache.js"></script>
     <script src="js/mru.js"></script>
+    <script src="js/lru.js"></script>
+    <script src="js/fifo.js"></script>
     <script src="js/simulator.js"></script>
     <script src="js/ui.js"></script>
 </body>
