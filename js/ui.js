@@ -40,6 +40,8 @@ function initializeCache() {
     const replacementPolicy = document.getElementById('replacementPolicy').value;
     const lineSize = parseInt(document.getElementById('lineSize').value);
     const memoryBlocks = parseInt(document.getElementById('memoryBlocks').value);
+    const cacheAccessTime = parseFloat(document.getElementById('cacheAccessTime').value);
+    const memoryAccessTime = parseFloat(document.getElementById('memoryAccessTime').value);
     let blocksPerSet = parseInt(document.getElementById('blocksPerSet').value);
     
     // Adjust blocks per set based on mapping algorithm
@@ -79,7 +81,22 @@ function initializeCache() {
         return;
     }
     
-    simulator.initCache(cacheBlocks, blocksPerSet, lineSize, mappingAlgorithm, replacementPolicy, memoryBlocks);
+    if (cacheAccessTime <= 0 || cacheAccessTime > 100) {
+        alert('Cache access time must be between 0.1 and 100 nanoseconds');
+        return;
+    }
+    
+    if (memoryAccessTime <= 0 || memoryAccessTime > 1000) {
+        alert('Memory access time must be between 1 and 1000 nanoseconds');
+        return;
+    }
+    
+    if (memoryAccessTime <= cacheAccessTime) {
+        alert('Memory access time must be greater than cache access time');
+        return;
+    }
+    
+    simulator.initCache(cacheBlocks, blocksPerSet, lineSize, mappingAlgorithm, replacementPolicy, memoryBlocks, cacheAccessTime, memoryAccessTime);
     updateCacheDisplay();
     updateStats();
     
@@ -96,6 +113,7 @@ function initializeCache() {
     }
     
     logMessage += `, ${lineSize} words per line, ${memoryBlocks} memory blocks`;
+    logMessage += `, Cache: ${cacheAccessTime}ns, Memory: ${memoryAccessTime}ns`;
     
     addLogMessage(logMessage);
 }
@@ -170,6 +188,8 @@ function loadTestCase() {
     const replacementPolicy = document.getElementById('replacementPolicy').value;
     const lineSize = parseInt(document.getElementById('lineSize').value);
     const memoryBlocks = parseInt(document.getElementById('memoryBlocks').value);
+    const cacheAccessTime = parseFloat(document.getElementById('cacheAccessTime').value);
+    const memoryAccessTime = parseFloat(document.getElementById('memoryAccessTime').value);
     let blocksPerSet = parseInt(document.getElementById('blocksPerSet').value);
     let customInput = '';
     let randomCount = 64; // default value
@@ -198,7 +218,7 @@ function loadTestCase() {
         }
     }
 
-    simulator.loadTestCase(testCase, cacheBlocks, blocksPerSet, lineSize, mappingAlgorithm, replacementPolicy, customInput, randomCount, memoryBlocks);
+    simulator.loadTestCase(testCase, cacheBlocks, blocksPerSet, lineSize, mappingAlgorithm, replacementPolicy, customInput, randomCount, memoryBlocks, cacheAccessTime, memoryAccessTime);
     simulator.startStepping();
 
     updateSequenceDisplay();
@@ -396,6 +416,8 @@ function resetCache() {
     document.getElementById('replacementPolicy').value = 'mru';
     document.getElementById('lineSize').value = 4;
     document.getElementById('memoryBlocks').value = 1024;
+    document.getElementById('cacheAccessTime').value = 1;
+    document.getElementById('memoryAccessTime').value = 10;
 
     // Update UI based on mapping algorithm
     onMappingAlgorithmChange();

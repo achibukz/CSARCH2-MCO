@@ -18,10 +18,12 @@ class Simulator {
         this.memoryAccessTime = 10;
     }
 
-    initCache(numBlocks, ways, lineSize = 1, mappingAlgorithm = 'set-associative', replacementType = 'mru', memoryBlocks = 1024) {
+    initCache(numBlocks, ways, lineSize = 1, mappingAlgorithm = 'set-associative', replacementType = 'mru', memoryBlocks = 1024, cacheAccessTime = 1, memoryAccessTime = 10) {
         this.mappingAlgorithm = mappingAlgorithm;
         this.replacementType = replacementType;
         this.memoryBlocks = memoryBlocks;
+        this.cacheAccessTime = cacheAccessTime;
+        this.memoryAccessTime = memoryAccessTime;
         
         // Adjust ways based on mapping algorithm
         if (mappingAlgorithm === 'direct') {
@@ -236,10 +238,10 @@ class Simulator {
         return this.currentSequence;
     }
 
-    loadTestCase(testName, numBlocks, ways, lineSize = 1, mappingAlgorithm = 'set-associative', replacementType = 'mru', customInput = null, randomCount = 64, memoryBlocks = 1024) {
+    loadTestCase(testName, numBlocks, ways, lineSize = 1, mappingAlgorithm = 'set-associative', replacementType = 'mru', customInput = null, randomCount = 64, memoryBlocks = 1024, cacheAccessTime = 1, memoryAccessTime = 10) {
         numBlocks = numBlocks || 8;
         ways = ways || 4;
-        this.initCache(numBlocks, ways, lineSize, mappingAlgorithm, replacementType, memoryBlocks);
+        this.initCache(numBlocks, ways, lineSize, mappingAlgorithm, replacementType, memoryBlocks, cacheAccessTime, memoryAccessTime);
         
         if (testName === 'Sequential Test' || testName === 'sequential') {
             this.loadSequentialTest(numBlocks);
