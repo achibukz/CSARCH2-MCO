@@ -41,7 +41,6 @@ class Simulator {
                 this.replacementPolicy = new FIFO(numSets);
                 break;
             case 'mru':
-            default:
                 this.replacementPolicy = new MRU(numSets);
                 break;
         }
@@ -125,7 +124,6 @@ class Simulator {
                 this.replacementPolicy.updateFIFO(block, setIndex);
                 break;
             case 'mru':
-            default:
                 this.replacementPolicy.updateMRU(block, setIndex);
                 break;
         }
@@ -144,7 +142,6 @@ class Simulator {
                 this.replacementPolicy.removeFromFIFO(block, setIndex);
                 break;
             case 'mru':
-            default:
                 this.replacementPolicy.removeFromMRU(block, setIndex);
                 break;
         }
@@ -152,23 +149,26 @@ class Simulator {
 
     generateExplanation(block, setIndex, isHit, removedBlock) {
         if (this.mappingAlgorithm === 'direct') {
-            // For direct mapping, explain the modulo operation
-            let explanation = `Access block ${block} → Set ${setIndex} (${block} mod ${this.cache.cache.length}). `;
-            
-            if (isHit) {
-                explanation += `HIT! Block ${block} found in cache.`;
-            } else {
-                if (removedBlock !== null) {
-                    explanation += `MISS! Replaced block ${removedBlock} with block ${block}.`;
-                } else {
-                    explanation += `MISS! Loaded block ${block} into empty cache slot.`;
-                }
-            }
-            return explanation;
+            return this.generateDirectMappingExplanation(block, setIndex, isHit, removedBlock);
         } else {
             // For set associative and fully associative, use the replacement policy explanation
             return this.replacementPolicy.generateExplanation(block, setIndex, isHit, removedBlock);
         }
+    }
+
+    generateDirectMappingExplanation(block, setIndex, isHit, removedBlock) {
+        let explanation = `Access block ${block} → Set ${setIndex} (${block} mod ${this.cache.cache.length}). `;
+
+        if (isHit) {
+            explanation += `HIT! Block ${block} found in cache.`;
+        } else {
+            if (removedBlock !== null) {
+                explanation += `MISS! Replaced block ${removedBlock} with block ${block}.`;
+            } else {
+                explanation += `MISS! Loaded block ${block} into empty cache slot.`;
+            }
+        }
+        return explanation;
     }
 
     getAllReplacementOrders() {
@@ -178,7 +178,6 @@ class Simulator {
             case 'fifo':
                 return this.replacementPolicy.getAllFIFOOrders();
             case 'mru':
-            default:
                 return this.replacementPolicy.getAllMRUOrders();
         }
     }
@@ -202,9 +201,9 @@ class Simulator {
         return this.currentSequence;
     }
 
-    loadRandomTest() {
+    loadRandomTest(randomCount = 64) {
         this.currentSequence = [];
-        for (let i = 0; i < 64; i++) {
+        for (let i = 0; i < randomCount; i++) {
             this.currentSequence.push(Math.floor(Math.random() * this.memoryBlocks));
         }
         return this.currentSequence;
@@ -234,7 +233,7 @@ class Simulator {
         return this.currentSequence;
     }
 
-    loadTestCase(testName, numBlocks, ways, lineSize = 1, mappingAlgorithm = 'set-associative', replacementType = 'mru', customInput = null) {
+    loadTestCase(testName, numBlocks, ways, lineSize = 1, mappingAlgorithm = 'set-associative', replacementType = 'mru', customInput = null, randomCount = 64) {
         numBlocks = numBlocks || 8;
         ways = ways || 4;
         this.initCache(numBlocks, ways, lineSize, mappingAlgorithm, replacementType);
@@ -244,7 +243,7 @@ class Simulator {
         } else if (testName === 'Mid-Repeat Test' || testName === 'mid-repeat') {
             this.loadMidRepeatTest(numBlocks);
         } else if (testName === 'Random Test' || testName === 'random') {
-            this.loadRandomTest();
+            this.loadRandomTest(randomCount);
         } else if (testName === 'Custom Test' || testName === 'custom') {
             this.loadCustomTest(customInput || '');
         }
@@ -287,7 +286,6 @@ class Simulator {
                     this.replacementPolicy.fifoOrder = this.copyArray(stepData.replacementState);
                     break;
                 case 'mru':
-                default:
                     this.replacementPolicy.mruOrder = this.copyArray(stepData.replacementState);
                     break;
             }

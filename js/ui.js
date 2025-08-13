@@ -103,7 +103,10 @@ function isValidBlocksPerSet(blocksPerSet, cacheBlocks) {
 function onTestCaseChange() {
     const testCase = document.getElementById('testCase').value;
     const customInputGroup = document.getElementById('customInputGroup');
+    const randomCountGroup = document.getElementById('randomCountGroup');
+    
     customInputGroup.style.display = testCase === 'custom' ? 'block' : 'none';
+    randomCountGroup.style.display = testCase === 'random' ? 'block' : 'none';
 }
 
 function autoStepTick() {
@@ -157,6 +160,7 @@ function loadTestCase() {
     const lineSize = parseInt(document.getElementById('lineSize').value);
     let blocksPerSet = parseInt(document.getElementById('blocksPerSet').value);
     let customInput = '';
+    let randomCount = 64; // default value
 
     // Adjust blocks per set based on mapping algorithm
     if (mappingAlgorithm === 'direct') {
@@ -171,9 +175,18 @@ function loadTestCase() {
             alert('Please enter a custom sequence');
             return;
         }
+    } else if (testCase === 'random') {
+        randomCount = parseInt(document.getElementById('randomCount').value);
+        if (randomCount < 1) {
+            alert('Random count must be greater than 0');
+            return;
+        } else if (randomCount > 2048) {
+            alert('For the sake of your computer, please enter a smaller number.');
+            return;
+        }
     }
 
-    simulator.loadTestCase(testCase, cacheBlocks, blocksPerSet, lineSize, mappingAlgorithm, replacementPolicy, customInput);
+    simulator.loadTestCase(testCase, cacheBlocks, blocksPerSet, lineSize, mappingAlgorithm, replacementPolicy, customInput, randomCount);
     simulator.startStepping();
 
     updateSequenceDisplay();
@@ -186,7 +199,11 @@ function loadTestCase() {
     document.getElementById('autoStepBtn').classList.remove('secondary');
 
     addLogMessage(`Test case loaded: ${testCase}`);
-    addLogMessage(`Sequence: [${simulator.currentSequence.join(', ')}]`);
+    if (testCase === 'random') {
+        addLogMessage(`Random sequence with ${randomCount} blocks: [${simulator.currentSequence.join(', ')}]`);
+    } else {
+        addLogMessage(`Sequence: [${simulator.currentSequence.join(', ')}]`);
+    }
     addLogMessage('Ready to begin simulation. Use step controls to proceed.');
 }
 
@@ -383,7 +400,9 @@ function resetCache() {
     const testCaseSelect = document.getElementById('testCase');
     testCaseSelect.selectedIndex = 0;
     document.getElementById('customInput').value = '';
+    document.getElementById('randomCount').value = 64; // Reset to default
     document.getElementById('customInputGroup').style.display = 'none';
+    document.getElementById('randomCountGroup').style.display = 'none';
 
     // Reset UI states
     document.getElementById('logContent').innerHTML = 'Cache reset. Load a test case to begin.';
@@ -402,7 +421,9 @@ function resetTestCase() {
     document.getElementById('sequenceDisplay').innerHTML = '<strong>Sequence:</strong> Load a test case to see the sequence';
     document.getElementById('logContent').innerHTML = 'Test case reset. Load a new test case to begin.';
     document.getElementById('customInput').value = '';
+    document.getElementById('randomCount').value = 64; // Reset to default
     document.getElementById('customInputGroup').style.display = 'none';
+    document.getElementById('randomCountGroup').style.display = 'none';
 
     // Update visuals and stats
     updateStats();
