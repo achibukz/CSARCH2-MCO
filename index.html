@@ -63,6 +63,10 @@
                     <label for="customInput">Custom Sequence (comma-separated):</label>
                     <textarea id="customInput" placeholder="0, 1, 2, 3, 4, 5, 6, 7"></textarea>
                 </div>
+                <div class="form-group" id="randomCountGroup" style="display: none;">
+                    <label for="randomCount">Number of Random Blocks to Access (Max: 2048):</label>
+                    <input type="number" id="randomCount" value="64" min="1" max="2048" step="1" placeholder="Enter number of random blocks">
+                </div>
                 <button class="btn btn-success" id="loadTestBtn">Load Test Case</button>
                 <button id="reset-testcase-btn" class="btn btn-secondary">Reset Test Case</button>
             </div>
